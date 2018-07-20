@@ -17,7 +17,7 @@ class TestDuplicateFinder(unittest.TestCase):
                                                'duplicate_finder.py'])
         except subprocess.CalledProcessError as error:
             assert error.returncode == 2
-            assert 'takes exactly 1 argument' in error.output
+            assert 'takes exactly 1 argument' in error.output.decode('utf-8')
             return
 
         assert false
@@ -29,7 +29,7 @@ class TestDuplicateFinder(unittest.TestCase):
                                                './fake_directory'])
         except subprocess.CalledProcessError as error:
             assert error.returncode == 1
-            assert 'Invalid directory' in error.output
+            assert 'Invalid directory' in error.output.decode('utf-8')
             return
 
         assert false
@@ -41,7 +41,7 @@ class TestDuplicateFinder(unittest.TestCase):
                                    stdout=subprocess.PIPE)
         output, error = process.communicate()
         assert error is None
-        assert 'No duplicates found' in output
+        assert 'No duplicates found' in output.decode('utf-8')
 
     def test_valid_directory(self):
         process = subprocess.Popen(['python',
@@ -49,6 +49,7 @@ class TestDuplicateFinder(unittest.TestCase):
                                     './test_directory'],
                                    stdout=subprocess.PIPE)
         output, error = process.communicate()
+        output = output.decode('utf-8')
         assert error is None
         assert 'Found 2 group(s)' in output
         assert 'duplicate_1' in output
