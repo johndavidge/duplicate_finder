@@ -8,19 +8,20 @@ class TestDuplicateFinder(unittest.TestCase):
                                    stdout=subprocess.PIPE)
         output, error = process.communicate()
         help_string = 'usage: python duplicate_finder.py <directory>'
-        assert error is None
-        assert help_string in output.decode('utf-8')
+        self.assertIsNone(error)
+        self.assertIn(help_string, output.decode('utf-8'))
 
     def test_syntax_error(self):
         try:
             process = subprocess.check_output(['python',
                                                'duplicate_finder.py'])
         except subprocess.CalledProcessError as error:
-            assert error.returncode == 2
-            assert 'takes exactly 1 argument' in error.output.decode('utf-8')
+            self.assertEqual(error.returncode, 2)
+            self.assertIn('takes exactly 1 argument',
+                          error.output.decode('utf-8'))
             return
 
-        assert false
+        self.assertTrue(False)
 
     def test_invalid_directory(self):
         try:
@@ -28,11 +29,11 @@ class TestDuplicateFinder(unittest.TestCase):
                                                'duplicate_finder.py',
                                                './fake_directory'])
         except subprocess.CalledProcessError as error:
-            assert error.returncode == 1
-            assert 'Invalid directory' in error.output.decode('utf-8')
+            self.assertEqual(error.returncode, 1)
+            self.assertIn('Invalid directory', error.output.decode('utf-8'))
             return
 
-        assert false
+        self.assertTrue(False)
 
     def test_empty_directory(self):
         process = subprocess.Popen(['python',
@@ -40,8 +41,8 @@ class TestDuplicateFinder(unittest.TestCase):
                                     './test_directory/empty_directory'],
                                    stdout=subprocess.PIPE)
         output, error = process.communicate()
-        assert error is None
-        assert 'No duplicates found' in output.decode('utf-8')
+        self.assertIsNone(error)
+        self.assertIn('No duplicates found', output.decode('utf-8'))
 
     def test_valid_directory(self):
         process = subprocess.Popen(['python',
@@ -50,13 +51,13 @@ class TestDuplicateFinder(unittest.TestCase):
                                    stdout=subprocess.PIPE)
         output, error = process.communicate()
         output = output.decode('utf-8')
-        assert error is None
-        assert 'Found 2 group(s)' in output
-        assert 'duplicate_1' in output
-        assert 'duplicate_2' in output
-        assert 'duplicate_3' in output
-        assert 'duplicate_4' in output
-        assert 'different' not in output
+        self.assertIsNone(error)
+        self.assertIn('Found 2 group(s)', output)
+
+        for i in range(1, 5):
+            self.assertIn('duplicate_%s' % i, output)
+
+        self.assertNotIn('different', output)
 
 
 if __name__ == '__main__':
